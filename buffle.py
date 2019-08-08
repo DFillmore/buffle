@@ -1,4 +1,4 @@
-# Copyright (C) 2001 - 2019 David Fillmore
+# Copyright (C) 2019 David Fillmore
 #
 # This file is part of buffle.
 #
@@ -85,9 +85,36 @@ for picnum in blorbfile.resindex[b'Pict']:
 
 def addScreenInfo(tree_view, screen):
     root_node = tree_view.add_node(TreeViewLabel(text='Screen', is_open=False))
-    for a in screen:
-        t = str(a) + ': ' + str(screen[a])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
+    t = 'Standard window width: ' + str(screen['px'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+    t = 'Standard window height: ' + str(screen['py'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+    
+    if screen['minx'] == 0:
+        t = 'Minimum window width: no limit'
+    else:
+        t = 'Minimum window width: ' + str(screen['minx'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
+    if screen['maxx'] == 0:
+        t = 'Maximum window width: no limit'
+    else:
+        t = 'Maxmimum window width: ' + str(screen['maxy'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
+    if screen['minx'] == 0:
+        t = 'Minimum window height: no limit'
+    else:
+        t = 'Minimum window height: ' + str(screen['miny'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
+    if screen['maxy'] == 0:
+        t = 'Maximum window height: no limit'
+    else:
+        t = 'Maxmimum window height: ' + str(screen['maxy'])
+    tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
 
 def addPictures(tree_view, pictures):
     root_node = tree_view.add_node(TreeViewLabel(text='Pictures', is_open=True))
@@ -99,20 +126,19 @@ def addPictures(tree_view, pictures):
         
         t = 'Size: ' +str(picsize) + ' bytes'
         tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
-        
-        r = tree_view.add_node(TreeViewLabel(text='Scale Information', is_open=False), p)
-        t = 'numerator of standard ratio: ' + str(pictures[a]['scale']['ratnum'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
-        t = 'denominator of standard ratio: ' + str(pictures[a]['scale']['ratden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
-        t = 'numerator of minimum ratio: ' + str(pictures[a]['scale']['minnum'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
-        t = 'denominator of minimum ratio:: ' + str(pictures[a]['scale']['minden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
-        t = 'numerator of maximum ratio ' + str(pictures[a]['scale']['maxnum'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
-        t = 'denominator of maximum ratio: ' + str(pictures[a]['scale']['maxden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), r)
+              
+        t = 'Standard ratio: ' + str(pictures[a]['scale']['ratnum']) + '/' + str(pictures[a]['scale']['ratden'])
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        if pictures[a]['scale']['minnum'] == 0:
+            t = 'Minimum ratio: no limit'
+        else:
+            t = 'Minimum ratio: ' + str(pictures[a]['scale']['minnum']) + '/' + str(pictures[a]['scale']['minden'])
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        if pictures[a]['scale']['maxnum'] == 0:
+            t = 'Maximum ratio: no limit'
+        else:
+            t = 'Maximum ratio: ' + str(pictures[a]['scale']['maxnum']) + '/' + str(pictures[a]['scale']['maxden'])
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
 
 
 
