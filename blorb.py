@@ -366,7 +366,7 @@ class Blorb:
         return chunks
 
 
-    def getmetadata(self):
+    def getMetaData(self):
         resoplace = self.findChunk(b'IFmd')
         if resoplace == False:
             return None
