@@ -38,7 +38,10 @@ pictures = blorbfile.resindex[b'Pict']
 sounds = blorbfile.resindex[b'Snd ']
 executables = blorbfile.resindex[b'Exec']
 
-screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
+try:
+    screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
+except:
+    screen = None
 
 pictures = {}
 for picnum in blorbfile.resindex[b'Pict']:
