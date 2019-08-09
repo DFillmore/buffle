@@ -37,8 +37,8 @@ blorbfile = blorb.Blorb(filename)
 chunks = blorbfile.listChunks()
 
 picindex = blorbfile.resindex[b'Pict']
-soundindex = blorbfile.resindex[b'Snd ']
-executableindex = blorbfile.resindex[b'Exec']
+sndindex = blorbfile.resindex[b'Snd ']
+execindex = blorbfile.resindex[b'Exec']
 
 try:
     screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
@@ -54,7 +54,7 @@ for picnum in picindex:
     pictures[picnum] = p
 
 sounds = {}
-for sndnum in soundindex:
+for sndnum in sndindex:
     s = {}
     s['data'] = blorbfile.getSnd(sndnum)
     s['format'] = blorbfile.getSndFormat(sndnum)
@@ -62,6 +62,12 @@ for sndnum in soundindex:
     sounds[sndnum] = s
     
     
+executables = {}
+for execnum in execindex:
+    e = {}
+    e['data'] = blorbfile.getExec(execnum)
+    e['format'] = blorbfile.getExecFormat(execnum)
+    executables[execnum] = e
     
 
 
@@ -106,7 +112,9 @@ def addScreenInfo(tree_view, screen):
 
 
 def addPictures(tree_view, pictures):
-    root_node = tree_view.add_node(TreeViewLabel(text='Pictures', is_open=True))
+    if len(pictures) == 0:
+        return False
+    root_node = tree_view.add_node(TreeViewLabel(text='Pictures', is_open=False))
     for a in pictures: # data, size, scale
         t = 'Image number: ' + str(a)
         p = tree_view.add_node(TreeViewLabel(text=t, is_open=False, on_node_expand=showpicture), root_node)
@@ -135,31 +143,79 @@ def showpicture():
     pass
 
 def addSounds(tree_view, sounds):
-    root_node = tree_view.add_node(TreeViewLabel(text='Sounds', is_open=True))
+    if len(sounds) == 0:
+        return False
+    root_node = tree_view.add_node(TreeViewLabel(text='Sounds', is_open=False))
+    #print('sounds', sounds)
     for a in sounds: # data, format, type
+        print(a)
         t = 'Sound number: ' + str(a)
-        p = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+        s = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
         sndsize = len(sounds[a]['data'])
         
         t = 'Size: ' +str(sndsize) + ' bytes'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
 
         f = sounds[a]['format']
-        if f == 'OGGV':
+        if f == b'OGGV':
             f = 'Ogg Vorbis'
                           
         t = 'Format: ' + str(f)
         
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
 
         t = 'Type: '
         if sounds[a]['type'] == 0:
             t += 'Sample'
         else:
             t += 'Music'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
     
+def addExecutables(tree_view, execs):
+    if len(execs) == 0:
+        return False
+    root_node = tree_view.add_node(TreeViewLabel(text='Executables (game files)', is_open=False))    
+    for a in execs: # data, format
+        t = 'Executable number: ' + str(a)
+        e = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
+
+        execsize = len(execs[a]['data'])
+        
+        t = 'Size: ' +str(execsize) + ' bytes'
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), e)
+
+        f = execs[a]['format']
+        if f == b'ZCOD':
+            f = 'Z-code'
+        if f == b'GLUL': 
+            f = 'Glulx'
+        if f == b'TAD2': 
+            f = 'TADS 2'
+        if f == b'TAD3': 
+            f = 'TADS 3'
+        if f == b'HUGO': 
+            f = 'Hugo'
+        if f == b'ALAN': 
+            f = 'Alan'
+        if f == b'ADRI': 
+            f = 'ADRIFT'
+        if f == b'LEVE': 
+            f = 'Level 9'
+        if f == b'AGT ': 
+            f = 'AGT'
+        if f == b'MAGS': 
+            f = 'Magnetic Scrolls'
+        if f == b'ADVS': 
+            f = 'AdvSys'
+        if f == b'EXEC': 
+            f = 'Native executable' 
+
+        t = 'Format: ' + str(f)
+        
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), e)
+
+            
 
 
 class MainApp(App):
@@ -176,6 +232,7 @@ class MainApp(App):
         addScreenInfo(tree, screen)
         addPictures(tree, pictures)
         addSounds(tree, sounds)
+        addExecutables(tree, executables)
        
 
         root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
