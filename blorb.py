@@ -24,8 +24,8 @@ class rect:
         if data:
             width = data[:4]
             height = data[4:8]
-            self.width = fbnum(width)
-            self.height = fbnum(height)
+            self.width = int.from_bytes(width, byteorder='big')
+            self.height = int.from_bytes(height, byteorder='big')
         else:
             self.width = 0
             self.height = 0
@@ -81,7 +81,8 @@ class Blorb:
             raise InvalidBlorbFile("Error opening the Blorb file.")
         x = self.findChunk(b'RIdx')
         x += 8
-        rescount = fbnum(self.data[x:x+4])
+        
+        rescount = int.from_bytes(self.data[x:x+4], byteorder='big')
         x += 4
         self.resindex = {}
         self.resindex[b'Pict'] = {}
@@ -89,8 +90,8 @@ class Blorb:
         self.resindex[b'Exec'] = {}
         for a in range(rescount):
             usage = self.data[x+(a*12):x+(a*12)+4]
-            resnum = fbnum(self.data[x+(a*12)+4:x+(a*12)+8])
-            pos = fbnum(self.data[x+(a*12)+8:x+(a*12)+12])
+            resnum = int.from_bytes(self.data[x+(a*12)+4:x+(a*12)+8], byteorder='big')
+            pos = int.from_bytes(self.data[x+(a*12)+8:x+(a*12)+12], byteorder='big')
             try:
                 self.resindex[usage][resnum] = pos
             except:
@@ -134,7 +135,7 @@ class Blorb:
         return False
 
     def chunkSize(self, place):
-        size = fbnum(self.data[place+4:place+8])
+        size = int.from_bytes(self.data[place+4:place+8], byteorder='big')
         return size
        
     def chunkType(self, place):
@@ -377,4 +378,4 @@ class Blorb:
         return None
 
 def fbnum(b):
-    return (b[0] << 24) + (b[1] << 16) + (b[2] << 8) + b[3]
+    return int.from_bytes(b, byteorder='big')
