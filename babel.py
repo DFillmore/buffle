@@ -24,7 +24,7 @@ def getbibliographic(iFiction):
         return None
     return biblio
 
-def gettitle(iFiction):
+def getTitle(iFiction):
     try:
         biblio = getbibliographic(iFiction)
         title = biblio.getElementsByTagName('title')[0]
@@ -32,7 +32,7 @@ def gettitle(iFiction):
     except:
         return None
 
-def getheadline(iFiction):
+def getHeadline(iFiction):
     try:
         biblio = getbibliographic(iFiction)
         headline = biblio.getElementsByTagName('headline')[0]
@@ -40,7 +40,7 @@ def getheadline(iFiction):
     except:
         return None
 
-def getauthor(iFiction):
+def getAuthor(iFiction):
     try:
         biblio = getbibliographic(iFiction)
         author = biblio.getElementsByTagName('author')[0]
@@ -48,7 +48,7 @@ def getauthor(iFiction):
     except:
         return None
 
-def getdescription(iFiction):
+def getDescription(iFiction):
     try:
         biblio = getbibliographic(iFiction)
         desc = biblio.getElementsByTagName('description')[0]
@@ -68,7 +68,7 @@ def getdescription(iFiction):
     except:
         return None
 
-def getzcode(iFiction):
+def getZcode(iFiction):
     try:
         dom = parseString(iFiction)
         story = dom.getElementsByTagName('story')[0] # assumes only one story element
@@ -77,8 +77,8 @@ def getzcode(iFiction):
     except:
         return None
 
-def getcoverpicture(iFiction):
-    zcode = getzcode(iFiction)
+def getCoverPicture(iFiction):
+    zcode = getZcode(iFiction)
     try:
         coverpicture = zcode.getElementsByTagName('coverpicture')
         return int(coverpicture[0].childNodes[0].wholeText)
