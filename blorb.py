@@ -172,17 +172,24 @@ class Blorb:
             data = self.data[x+8:x+8+size]
         return data
 
-    def getSndType(self, sndnum):
-        # AIFF Sounds = effect
-        # Ogg Sounds = music
-        # mod sounds = music
-        # Song Sounds = music (unsupported)
+    def getSndFormat(self, sndnum):
         try:
             x = self.resindex[b'Snd '][sndnum]
         except:
             return False
         type = self.chunkType(x)
         if type == b'FORM':
+            return 'AIFF'
+        else:
+            return type
+        
+    def getSndType(self, sndnum):
+        # AIFF Sounds = effect
+        # Ogg Sounds = music
+        # mod sounds = music
+        # Song Sounds = music (unsupported)
+        format = self.getSndFormat(sndnum)
+        if format == 'AIFF':
             return 0 # effect
         return 1 # music
 
