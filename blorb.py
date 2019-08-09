@@ -201,17 +201,17 @@ class Blorb:
         resosize = self.chunkSize(x)
         resochunk = self.data[x+8:x+8+resosize]
         x = 0
-        px = float(fbnum(resochunk[x:x+4])) # standard window width
+        px = float(int.from_bytes(resochunk[x:x+4], byteorder='big')) # standard window width
         x += 4
-        py = float(fbnum(resochunk[x:x+4])) # standard window height
+        py = float(int.from_bytes(resochunk[x:x+4], byteorder='big')) # standard window height
         x += 4
-        minx = fbnum(resochunk[x:x+4]) # minimum window width
+        minx = int.from_bytes(resochunk[x:x+4], byteorder='big') # minimum window width
         x += 4
-        miny = fbnum(resochunk[x:x+4]) # minimum window height
+        miny = int.from_bytes(resochunk[x:x+4], byteorder='big') # minimum window height
         x += 4
-        maxx = fbnum(resochunk[x:x+4]) # maximum window width
+        maxx = int.from_bytes(resochunk[x:x+4], byteorder='big') # maximum window width
         x += 4
-        maxy = fbnum(resochunk[x:x+4]) # maximum window height
+        maxy = int.from_bytes(resochunk[x:x+4], byteorder='big') # maximum window height
         return (px, py, minx, miny, maxx, maxy)
 
 
@@ -276,19 +276,19 @@ class Blorb:
             b = a * 28
             entry = entrydata[b:b+28]
 
-            if fbnum(entry[:4]) == picnum:
+            if int.from_bytes(entry[:4], byteorder='big') == picnum:
                 found = True
                 break
         
         if found == False:
             return scaleData
     
-        scaleData['ratnum'] = fbnum(entry[4:8])
-        scaleData['ratden'] = fbnum(entry[8:12])
-        scaleData['minnum'] = fbnum(entry[12:16])
-        scaleData['minden'] = fbnum(entry[16:20])
-        scaleData['maxnum'] = fbnum(entry[20:24])
-        scaleData['maxden'] = fbnum(entry[24:28])
+        scaleData['ratnum'] = int.from_bytes(entry[4:8], byteorder='big')
+        scaleData['ratden'] = int.from_bytes(entry[8:12], byteorder='big')
+        scaleData['minnum'] = int.from_bytes(entry[12:16], byteorder='big')
+        scaleData['minden'] = int.from_bytes(entry[16:20], byteorder='big')
+        scaleData['maxnum'] = int.from_bytes(entry[20:24], byteorder='big')
+        scaleData['maxden'] = int.from_bytes(entry[24:28], byteorder='big')
         return scaleData
 
 
@@ -307,7 +307,7 @@ class Blorb:
         numentries = csize // 4
         entries = []
         for a in range(numentries):
-            entries.append(fbnum(chunk[4*a:(4*a) + 4]))
+            entries.append(int.from_bytes(chunk[4*a:(4*a) + 4], byteorder='big'))
 
         if picnum in entries:
             return currentpalette
@@ -321,7 +321,7 @@ class Blorb:
         x = 12
         while (id != chunkname) and (x < len(self.data)):
             id = self.data[x:x+4]
-            csize = fbnum(self.data[x+4:x+8])
+            csize = int.from_bytes(self.data[x+4:x+8], byteorder='big')
             if csize % 2 == 1:
                 csize += 1
             if id == chunkname:
@@ -338,7 +338,7 @@ class Blorb:
         chunks = []
         while (x < len(self.data)):
             id = self.data[x:x+4]
-            csize = fbnum(self.data[x+4:x+8])
+            csize = int.from_bytes(self.data[x+4:x+8], byteorder='big')
             c = {}
             c['type'] = id
             c['location'] = x
@@ -369,13 +369,10 @@ class Blorb:
                 pic = None
             return pic
         #rfile.seek(resoplace + 4)
-        #resosize = fbnum(rfile.read(4))
+        #resosize = int.from_bytes(rfile.read(4), byteorder='big')
         #if resosize != 4:
         #    return None
         #rfile.seek(resoplace+8)
-        #picnum = fbnum(rfile.read(4))
+        #picnum = int.from_bytes(rfile.read(4), byteorder='big')
         #pic = getpic(picnum, titlepic=True)
         return None
-
-def fbnum(b):
-    return int.from_bytes(b, byteorder='big')
