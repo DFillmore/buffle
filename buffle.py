@@ -28,12 +28,12 @@ import blorb
 import babel
 import os
 
-#filename = 'arthur.blb'
-#filename = 'journey.blb'
-#filename = 'shogun.blb'
-#filename = 'zorkzero.blb'
-#filename = 'moments.blb'
-filename = 'CounterfeitMonkey.gblorb'
+#filename = 'blorbs/arthur.blb'
+#filename = 'blorbs/journey.blb'
+#filename = 'blorbs/shogun.blb'
+#filename = 'blorbs/zorkzero.blb'
+#filename = 'blorbs/moments.blb'
+filename = 'blorbs/CounterfeitMonkey.gblorb'
 
 
 blorbfile = blorb.Blorb(filename)
@@ -57,13 +57,6 @@ for picnum in picindex:
     p['scale'] =  blorbfile.getScaleData(picnum)
     pictures[picnum] = p
 
-sounds = {}
-for sndnum in sndindex:
-    s = {}
-    s['data'] = blorbfile.getSnd(sndnum)
-    s['format'] = blorbfile.getSndFormat(sndnum)
-    s['type'] = blorbfile.getSndType(sndnum)
-    sounds[sndnum] = s
     
     
 
@@ -141,35 +134,31 @@ def showpicture():
     #im = CoreImage(data, ext="png")
     pass
 
-def addSounds(tree_view, sounds):
-    if len(sounds) == 0:
-        return False
-    root_node = tree_view.add_node(TreeViewLabel(text='Sounds', is_open=False))
-
-    for a in sounds: # data, format, type
-        t = 'Sound number: ' + str(a)
-        s = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
-
-        sndsize = len(sounds[a]['data'])
-        
-        t = 'Size: ' +str(sndsize) + ' bytes'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
-
-        f = sounds[a]['format']
-        if f == b'OGGV':
-            f = 'Ogg Vorbis'
-                          
-        t = 'Format: ' + str(f)
-        
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
-
-        t = 'Type: '
-        if sounds[a]['type'] == 0:
-            t += 'Sample'
-        else:
-            t += 'Music'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
+def soundsContent():
+    sounds = {}
+    for sndnum in sndindex:
+        s = {}
+        s['data'] = blorbfile.getSnd(sndnum)
+        s['format'] = blorbfile.getSndFormat(sndnum)
+        s['type'] = blorbfile.getSndType(sndnum)
+        sounds[sndnum] = s
     
+    if len(sounds) == 0:
+        return None
+
+    layout = GridLayout(cols=1)
+    soundnums = list(sounds.keys())
+    soundnums.sort()
+
+    for s in soundnums:
+        l = Label(text=str(s))
+        layout.add_widget(l)
+
+    scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
+    scroll.add_widget(layout)
+    return scroll
+
+        
 
 exec_format = {'ZCOD':'Z-code',
                'GLUL': 'Glulx',
@@ -282,7 +271,7 @@ class MainApp(App):
         tp.add_widget(overviewTab)
         
         tp.add_widget(imageTab)
-        tp.add_widget(soundTab)
+
 
         overviewTab.content = overviewContent()
 
@@ -290,6 +279,11 @@ class MainApp(App):
         if c:
             tp.add_widget(gameTab)
             gameTab.content = c
+
+        c = soundsContent()
+        if c:
+            tp.add_widget(soundTab)
+            soundTab.content = c
 
 
         #layout.bind(size=self._update_rect, pos=self._update_rect)
