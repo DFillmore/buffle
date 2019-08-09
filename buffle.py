@@ -20,9 +20,13 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader
+from kivy.uix.label import Label
 
 
 import blorb
+import babel
+import os
 
 #filename = 'arthur.blb'
 #filename = 'journey.blb'
@@ -62,12 +66,7 @@ for sndnum in sndindex:
     sounds[sndnum] = s
     
     
-executables = {}
-for execnum in execindex:
-    e = {}
-    e['data'] = blorbfile.getExec(execnum)
-    e['format'] = blorbfile.getExecFormat(execnum)
-    executables[execnum] = e
+
     
 
 
@@ -146,9 +145,8 @@ def addSounds(tree_view, sounds):
     if len(sounds) == 0:
         return False
     root_node = tree_view.add_node(TreeViewLabel(text='Sounds', is_open=False))
-    #print('sounds', sounds)
+
     for a in sounds: # data, format, type
-        print(a)
         t = 'Sound number: ' + str(a)
         s = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
@@ -172,75 +170,143 @@ def addSounds(tree_view, sounds):
             t += 'Music'
         tree_view.add_node(TreeViewLabel(text=t, is_open=False), s)
     
-def addExecutables(tree_view, execs):
-    if len(execs) == 0:
-        return False
-    root_node = tree_view.add_node(TreeViewLabel(text='Executables (game files)', is_open=False))    
-    for a in execs: # data, format
-        t = 'Executable number: ' + str(a)
-        e = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
-        execsize = len(execs[a]['data'])
+exec_format = {'ZCOD':'Z-code',
+               'GLUL': 'Glulx',
+               'TAD2': 'TADS 2',
+               'TAD3': 'TADS 3', 
+               'HUGO': 'Hugo', 
+               'ALAN': 'Alan', 
+               'ADRI': 'ADRIFT', 
+               'LEVE': 'Level 9', 
+               'AGT ': 'AGT', 
+               'MAGS': 'Magnetic Scrolls', 
+               'ADVS': 'AdvSys', 
+               'EXEC': 'Native executable' 
+              }
+
+def gameContent():
+
+    executables = {}
+    for execnum in execindex:
+        e = {}
+        e['data'] = blorbfile.getExec(execnum)
+        e['format'] = blorbfile.getExecFormat(execnum)
+        executables[execnum] = e
+    if len(executables) > 0:
+        gameFormat = exec_format[executables[0]['format'].decode('utf-8')]
+    else:
+        gameFormat = None
         
-        t = 'Size: ' +str(execsize) + ' bytes'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), e)
 
-        f = execs[a]['format']
-        if f == b'ZCOD':
-            f = 'Z-code'
-        if f == b'GLUL': 
-            f = 'Glulx'
-        if f == b'TAD2': 
-            f = 'TADS 2'
-        if f == b'TAD3': 
-            f = 'TADS 3'
-        if f == b'HUGO': 
-            f = 'Hugo'
-        if f == b'ALAN': 
-            f = 'Alan'
-        if f == b'ADRI': 
-            f = 'ADRIFT'
-        if f == b'LEVE': 
-            f = 'Level 9'
-        if f == b'AGT ': 
-            f = 'AGT'
-        if f == b'MAGS': 
-            f = 'Magnetic Scrolls'
-        if f == b'ADVS': 
-            f = 'AdvSys'
-        if f == b'EXEC': 
-            f = 'Native executable' 
+    iFiction = blorbfile.getMetaData()
+    if iFiction:
+        gameTitle = babel.getTitle(iFiction)
+        gameHeadline = babel.getHeadline(iFiction)
+        gameAuthor = babel.getAuthor(iFiction)
+        gameDescription = babel.getDescription(iFiction)
+        gameCoverPicture = babel.getCoverPicture(iFiction)
+    else:
+        gameTitle = None
+        gameHeadline = None
+        gameAuthor = None
+        gameDescription = None
+        gameCoverPicture = None
 
-        t = 'Format: ' + str(f)
-        
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), e)
+    if not iFiction and not gameFormat:
+        return None
+
+    
+    layout = GridLayout(cols=1)
+
+    if gameTitle:
+        titleLabel = Label(text=gameTitle)
+        layout.add_widget(titleLabel)
+
+    if gameHeadline:
+        headlineLabel = Label(text=gameHeadline)
+        layout.add_widget(headlineLabel)
+
+    if gameAuthor:
+        authorLabel = Label(text=gameAuthor)
+        layout.add_widget(authorLabel)
+
+    if gameFormat:
+        formatLabel = Label(text=gameFormat)
+        layout.add_widget(formatLabel)
+
+    if gameDescription:
+        descriptionLabel = Label(text=gameDescription)
+        layout.add_widget(descriptionLabel)
+
+    return layout
+
+
+
+    
+    
+       
+
+
+
+
 
             
+def overviewContent():
+    layout = GridLayout(cols=1)
+    filenameLabel = Label(text=filename)
+    layout.add_widget(filenameLabel)
+    
+    gameLabel = Label(text=str(len(execindex)))
+    layout.add_widget(gameLabel)
+
+    imagesLabel = Label(text=str(len(picindex)))
+    layout.add_widget(imagesLabel)
+
+    soundsLabel = Label(text=str(len(sndindex)))
+    layout.add_widget(soundsLabel)
+    
+    return layout
+
+
 
 
 class MainApp(App):
 
     def build(self):
+        tp = TabbedPanel(do_default_tab=False)
+        overviewTab = TabbedPanelHeader(text='Overview')
+        gameTab = TabbedPanelHeader(text='Game')
+        imageTab = TabbedPanelHeader(text='Images')
+        soundTab = TabbedPanelHeader(text='Sounds')
+        tp.add_widget(overviewTab)
         
+        tp.add_widget(imageTab)
+        tp.add_widget(soundTab)
+
+        overviewTab.content = overviewContent()
+
+        c = gameContent()
+        if c:
+            tp.add_widget(gameTab)
+            gameTab.content = c
+
 
         #layout.bind(size=self._update_rect, pos=self._update_rect)
 
-        tree = TreeView(root_options=dict(text=filename),
-                        hide_root=False,
-                        indent_level=4, size_hint_y=None)
-        tree.bind(minimum_height = tree.setter('height'))
-        addScreenInfo(tree, screen)
-        addPictures(tree, pictures)
-        addSounds(tree, sounds)
-        addExecutables(tree, executables)
+
+        #addScreenInfo(tree, screen)
+        #addPictures(tree, pictures)
+        #addSounds(tree, sounds)
+        #addExecutables(tree, executables)
        
 
-        root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
-        root.add_widget(tree)
-        layout=GridLayout(cols=1, spacing=10, size_hint_y=None)
-        layout.add_widget
+        #root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
+        #root.add_widget(tree)
 
-        return root
+        #gameTab.add_widget(root)
+
+        return tp
 
 if __name__ == '__main__':
     MainApp().run()
@@ -254,23 +320,4 @@ if __name__ == '__main__':
 
 
 
-# ZorkZero.blb
-# - screen
-#   - standard width: 600
-#   - standard height: 400
-#   - minimum width: no limit
-#   - maxmimum width: no limit
-#   - minimum height: no limit
-#   - maximum height: no limit
-# - images
-#   - 1 
-#   - 2
-#   - 3
-#     - 69kb
-#     - scale: blah blah blah
-#     - format: PNG
-# - sounds
-#   - 3
-#     - 58463kb
-#     - type: music
-#     - format: Ogg Vorbis
+
