@@ -27,16 +27,18 @@ import blorb
 #filename = 'arthur.blb'
 #filename = 'journey.blb'
 #filename = 'shogun.blb'
-filename = 'zorkzero.blb'
+#filename = 'zorkzero.blb'
+#filename = 'moments.blb'
+filename = 'CounterfeitMonkey.gblorb'
 
 
 blorbfile = blorb.Blorb(filename)
 
 chunks = blorbfile.listChunks()
 
-pictures = blorbfile.resindex[b'Pict']
-sounds = blorbfile.resindex[b'Snd ']
-executables = blorbfile.resindex[b'Exec']
+picindex = blorbfile.resindex[b'Pict']
+soundindex = blorbfile.resindex[b'Snd ']
+executableindex = blorbfile.resindex[b'Exec']
 
 try:
     screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
@@ -44,49 +46,33 @@ except:
     screen = None
 
 pictures = {}
-for picnum in blorbfile.resindex[b'Pict']:
+for picnum in picindex:
     p = {}
     p['data'] = blorbfile.getPict(picnum)
     p['size'] = len(p['data'])
     p['scale'] =  blorbfile.getScaleData(picnum)
     pictures[picnum] = p
 
-
-
-#print('PICTURES!')
-#for a in pictures:
-#    p = pictures[a]
-#    print('Picture', a)
-#    print(' - Size:', p['size'])
-#    print(' - Scale')
-#    print('   - numerator of standard ratio:', p['scale']['ratnum'])
-#    print('   - numerator of standard ratio:', p['scale']['ratnum'])
-#    print('   - denominator of standard ratio:', p['scale']['ratden'])
-#    print('   - numerator of minimum ratio:', p['scale']['minnum'])
-#    print('   - denominator of minimum ratio:', p['scale']['minden'])
-#    print('   - numerator of maximum ratio:', p['scale']['maxnum'])
-#    print('   - denominator of maximum ratio:', p['scale']['maxden'])
-
-#print('Picture\tSize\tnumerator of standard ratio\tnumerator of standard ratio\tdenominator of standard ratio\tnumerator of minimum ratio\tdenominator of minimum ratio\tnumerator of maximum ratio\tdenominator of maximum ratio')
-#for a in pictures:
-#    p = pictures[a]
-#    
-#    print(str(a) + '\t' + str(p['size']) + '\t' + str(p['scale']['ratnum']) + '\t' + str(p['scale']['ratnum']) + '\t' + str(p['scale']['ratden']) + '\t' + str(p['scale']['minnum']) + '\t' + str(p['scale']['minden']) + '\t' + str(p['scale']['maxnum']) + '\t' + str(p['scale']['maxden']))
+sounds = {}
+for sndnum in soundindex:
+    s = {}
+    s['data'] = blorbfile.getSnd(sndnum)
+    s['format'] = blorbfile.getSndFormat(sndnum)
+    s['type'] = blorbfile.getSndType(sndnum)
+    sounds[sndnum] = s
+    
+    
+    
 
 
 
-#print('SOUNDS!')
-#for a in sounds:
-#    print(a)
-
-#print('GAMES!')
-#for a in executables:
- #   print(a)
 
 
 
 
 def addScreenInfo(tree_view, screen):
+    if not screen:
+        return False
     root_node = tree_view.add_node(TreeViewLabel(text='Screen', is_open=False))
 
     t = 'Standard window width: ' + str(screen['px'])
@@ -122,7 +108,7 @@ def addScreenInfo(tree_view, screen):
 def addPictures(tree_view, pictures):
     root_node = tree_view.add_node(TreeViewLabel(text='Pictures', is_open=True))
     for a in pictures: # data, size, scale
-        t = 'Image Number: ' + str(a)
+        t = 'Image number: ' + str(a)
         p = tree_view.add_node(TreeViewLabel(text=t, is_open=False, on_node_expand=showpicture), root_node)
         #p.bind(on_node_expand=lambda instance: showpicture(pictures[a]['data']))
         picsize = len(pictures[a]['data'])
@@ -144,12 +130,36 @@ def addPictures(tree_view, pictures):
         tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
 
 
-
 def showpicture():
     #im = CoreImage(data, ext="png")
     pass
 
+def addSounds(tree_view, sounds):
+    root_node = tree_view.add_node(TreeViewLabel(text='Sounds', is_open=True))
+    for a in sounds: # data, format, type
+        t = 'Sound number: ' + str(a)
+        p = tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
+        sndsize = len(sounds[a]['data'])
+        
+        t = 'Size: ' +str(sndsize) + ' bytes'
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+
+        f = sounds[a]['format']
+        if f == 'OGGV':
+            f = 'Ogg Vorbis'
+                          
+        t = 'Format: ' + str(f)
+        
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+
+        t = 'Type: '
+        if sounds[a]['type'] == 0:
+            t += 'Sample'
+        else:
+            t += 'Music'
+        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+    
 
 
 class MainApp(App):
@@ -165,7 +175,7 @@ class MainApp(App):
         tree.bind(minimum_height = tree.setter('height'))
         addScreenInfo(tree, screen)
         addPictures(tree, pictures)
-        #layout.add_widget(tree)
+        addSounds(tree, sounds)
        
 
         root = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
