@@ -1,2 +1,4 @@
 *.blb
 __pycache__/
+
+*.gblorb
