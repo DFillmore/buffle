@@ -150,6 +150,14 @@ class Blorb:
         size = self.chunkSize(x)
         data = self.data[x+8:x+8+size]
         return data
+
+    def getExecFormat(self, execnum):
+        try:
+            x = self.resindex[b'Exec'][execnum]
+        except:
+            return False
+        type = self.chunkType(x)
+        return type
         
     def getPict(self, picnum):
         try:
@@ -159,6 +167,14 @@ class Blorb:
         size = self.chunkSize(x)
         data = self.data[x+8:x+8+size]
         return data
+
+    def getPictFormat(self, picnum):
+        try:
+            x = self.resindex[b'Pict'][picnum]
+        except:
+            return False
+        type = self.chunkType(x)
+        return type
 
     def getSnd(self, sndnum):
         try:
@@ -180,7 +196,7 @@ class Blorb:
             return False
         type = self.chunkType(x)
         if type == b'FORM':
-            return 'AIFF'
+            return b'AIFF'
         else:
             return type
         
@@ -190,7 +206,7 @@ class Blorb:
         # mod sounds = music
         # Song Sounds = music (unsupported)
         format = self.getSndFormat(sndnum)
-        if format == 'AIFF':
+        if format == b'AIFF':
             return 0 # effect
         return 1 # music
 
