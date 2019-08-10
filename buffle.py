@@ -108,12 +108,13 @@ def picturesContent():
     if len(pictures) == 0:
         return None
 
-    layout = GridLayout(cols=1)
+    layout = GridLayout(cols=1, size_hint_y=None)
+    layout.bind(minimum_height=layout.setter('height'))
     picnums = list(pictures.keys())
     picnums.sort()
 
     for p in picnums:
-        l = Label(text=str(p))
+        l = Label(text=str(p), size_hint_y=None)
         layout.add_widget(l)
 
     scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
@@ -137,12 +138,13 @@ def soundsContent():
     if len(sounds) == 0:
         return None
 
-    layout = GridLayout(cols=1)
+    layout = GridLayout(cols=1, size_hint_y=None)
+    layout.bind(minimum_height=layout.setter('height'))
     soundnums = list(sounds.keys())
     soundnums.sort()
 
     for s in soundnums:
-        l = Label(text=str(s))
+        l = Label(text=str(s), size_hint_y=None)
         layout.add_widget(l)
 
     scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
