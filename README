@@ -1,0 +1,5 @@
+Buffle 0.1
+
+Buffle displays information about the contents of a Blorb file. To run it, you will need Python 3 and Kivy.
+
+usage: buffle.py <blorbfile>
