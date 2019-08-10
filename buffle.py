@@ -27,27 +27,22 @@ from kivy.uix.label import Label
 import blorb
 import babel
 import os
+import sys
 
 #filename = 'blorbs/arthur.blb'
 #filename = 'blorbs/journey.blb'
 #filename = 'blorbs/shogun.blb'
 #filename = 'blorbs/zorkzero.blb'
 #filename = 'blorbs/moments.blb'
-filename = 'blorbs/CounterfeitMonkey.gblorb'
+#filename = 'blorbs/CounterfeitMonkey.gblorb'
 
 
-blorbfile = blorb.Blorb(filename)
 
-chunks = blorbfile.listChunks()
 
-picindex = blorbfile.resindex[b'Pict']
-sndindex = blorbfile.resindex[b'Snd ']
-execindex = blorbfile.resindex[b'Exec']
-
-try:
-    screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
-except:
-    screen = None
+#try:
+#    screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
+#except:
+#    screen = None
 
 
 
@@ -345,7 +340,24 @@ class MainApp(App):
 
         return tp
 
+import sys, getopt
+
+def parameters(argv):
+    if len(argv) != 2:
+        print('usage: buffle.py <blorbfile>')
+        sys.exit()
+    return argv[1]
+    
 if __name__ == '__main__':
+    filename = parameters(sys.argv)
+    blorbfile = blorb.Blorb(filename)
+
+    #chunks = blorbfile.listChunks()
+
+    picindex = blorbfile.resindex[b'Pict']
+    sndindex = blorbfile.resindex[b'Snd ']
+    execindex = blorbfile.resindex[b'Exec']
+    
     MainApp().run()
 
 
