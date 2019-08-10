@@ -49,13 +49,7 @@ try:
 except:
     screen = None
 
-pictures = {}
-for picnum in picindex:
-    p = {}
-    p['data'] = blorbfile.getPict(picnum)
-    p['size'] = len(p['data'])
-    p['scale'] =  blorbfile.getScaleData(picnum)
-    pictures[picnum] = p
+
 
     
     
@@ -103,31 +97,28 @@ def addScreenInfo(tree_view, screen):
     tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
 
-def addPictures(tree_view, pictures):
+def picturesContent():
+    pictures = {}
+    for picnum in picindex:
+        p = {}
+        p['data'] = blorbfile.getPict(picnum)
+        p['size'] = len(p['data'])
+        p['scale'] =  blorbfile.getScaleData(picnum)
+        pictures[picnum] = p
     if len(pictures) == 0:
-        return False
-    root_node = tree_view.add_node(TreeViewLabel(text='Pictures', is_open=False))
-    for a in pictures: # data, size, scale
-        t = 'Image number: ' + str(a)
-        p = tree_view.add_node(TreeViewLabel(text=t, is_open=False, on_node_expand=showpicture), root_node)
-        #p.bind(on_node_expand=lambda instance: showpicture(pictures[a]['data']))
-        picsize = len(pictures[a]['data'])
-        
-        t = 'Size: ' +str(picsize) + ' bytes'
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
-              
-        t = 'Standard ratio: ' + str(pictures[a]['scale']['ratnum']) + '/' + str(pictures[a]['scale']['ratden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
-        if pictures[a]['scale']['minnum'] == 0:
-            t = 'Minimum ratio: no limit'
-        else:
-            t = 'Minimum ratio: ' + str(pictures[a]['scale']['minnum']) + '/' + str(pictures[a]['scale']['minden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
-        if pictures[a]['scale']['maxnum'] == 0:
-            t = 'Maximum ratio: no limit'
-        else:
-            t = 'Maximum ratio: ' + str(pictures[a]['scale']['maxnum']) + '/' + str(pictures[a]['scale']['maxden'])
-        tree_view.add_node(TreeViewLabel(text=t, is_open=False), p)
+        return None
+
+    layout = GridLayout(cols=1)
+    picnums = list(pictures.keys())
+    picnums.sort()
+
+    for p in picnums:
+        l = Label(text=str(p))
+        layout.add_widget(l)
+
+    scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
+    scroll.add_widget(layout)
+    return scroll
 
 
 def showpicture():
@@ -230,17 +221,6 @@ def gameContent():
 
     return layout
 
-
-
-    
-    
-       
-
-
-
-
-
-            
 def overviewContent():
     layout = GridLayout(cols=1)
     filenameLabel = Label(text=filename)
@@ -270,15 +250,17 @@ class MainApp(App):
         soundTab = TabbedPanelHeader(text='Sounds')
         tp.add_widget(overviewTab)
         
-        tp.add_widget(imageTab)
-
-
         overviewTab.content = overviewContent()
 
         c = gameContent()
         if c:
             tp.add_widget(gameTab)
             gameTab.content = c
+
+        c = picturesContent()
+        if c:
+            tp.add_widget(imageTab)
+            imageTab.content = c
 
         c = soundsContent()
         if c:
