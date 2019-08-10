@@ -97,59 +97,9 @@ def addScreenInfo(tree_view, screen):
     tree_view.add_node(TreeViewLabel(text=t, is_open=False), root_node)
 
 
-def picturesContent():
-    pictures = {}
-    for picnum in picindex:
-        p = {}
-        p['data'] = blorbfile.getPict(picnum)
-        p['size'] = len(p['data'])
-        p['scale'] =  blorbfile.getScaleData(picnum)
-        pictures[picnum] = p
-    if len(pictures) == 0:
-        return None
-
-    layout = GridLayout(cols=1, size_hint_y=None)
-    layout.bind(minimum_height=layout.setter('height'))
-    picnums = list(pictures.keys())
-    picnums.sort()
-
-    for p in picnums:
-        l = Label(text=str(p), size_hint_y=None)
-        layout.add_widget(l)
-
-    scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
-    scroll.add_widget(layout)
-    return scroll
 
 
-def showpicture():
-    #im = CoreImage(data, ext="png")
-    pass
 
-def soundsContent():
-    sounds = {}
-    for sndnum in sndindex:
-        s = {}
-        s['data'] = blorbfile.getSnd(sndnum)
-        s['format'] = blorbfile.getSndFormat(sndnum)
-        s['type'] = blorbfile.getSndType(sndnum)
-        sounds[sndnum] = s
-    
-    if len(sounds) == 0:
-        return None
-
-    layout = GridLayout(cols=1, size_hint_y=None)
-    layout.bind(minimum_height=layout.setter('height'))
-    soundnums = list(sounds.keys())
-    soundnums.sort()
-
-    for s in soundnums:
-        l = Label(text=str(s), size_hint_y=None)
-        layout.add_widget(l)
-
-    scroll = ScrollView(size_hint=(1, None), size=(Window.width, Window.height), bar_width=10, scroll_type=['bars', 'content'])
-    scroll.add_widget(layout)
-    return scroll
 
         
 
@@ -166,6 +116,36 @@ exec_format = {'ZCOD':'Z-code',
                'ADVS': 'AdvSys', 
                'EXEC': 'Native executable' 
               }
+
+#      self.label = Label(text="I'm aligned :)", size_hint=(1.0, 1.0), halign="left", valign="middle")
+#        self.label.bind(size=self.label.setter('text_size'))    
+#        self.root.add_widget(self.label)
+#        return self.root
+def overviewContent():
+    layout = GridLayout(cols=1)
+    filenameLabel = Label(text=filename, font_size=20)
+#    filenameLabel.bind(size=filenameLabel.setter('text_size'))
+    layout.add_widget(filenameLabel)
+    
+    t = 'Games: ' + str(len(execindex))
+    gameLabel = Label(text=t, font_size=20)
+#    gameLabel.bind(size=gameLabel.setter('text_size'))
+    layout.add_widget(gameLabel)
+
+
+    t = 'Images: ' + str(len(picindex))
+    imagesLabel = Label(text=t, font_size=20)
+#    imagesLabel.bind(size=imagesLabel.setter('text_size'))
+    layout.add_widget(imagesLabel)
+
+
+
+    t = 'Sounds: ' + str(len(sndindex))
+    soundsLabel = Label(text=t, font_size=20)
+#    soundsLabel.bind(size=soundsLabel.setter('text_size'))
+    layout.add_widget(soundsLabel)
+    
+    return layout
 
 def gameContent():
 
@@ -217,29 +197,104 @@ def gameContent():
         formatLabel = Label(text=gameFormat)
         layout.add_widget(formatLabel)
 
-    if gameDescription:
-        descriptionLabel = Label(text=gameDescription)
-        layout.add_widget(descriptionLabel)
+    #if gameDescription:
+    #    descriptionLabel = Label(text=gameDescription)
+    #    layout.add_widget(descriptionLabel)
 
     return layout
 
-def overviewContent():
-    layout = GridLayout(cols=1)
-    filenameLabel = Label(text=filename)
-    layout.add_widget(filenameLabel)
-    
-    gameLabel = Label(text=str(len(execindex)))
-    layout.add_widget(gameLabel)
+def picturesContent():
+    pictures = {}
+    for picnum in picindex:
+        p = {}
+        p['data'] = blorbfile.getPict(picnum)
+        p['size'] = len(p['data'])
+        p['scale'] =  blorbfile.getScaleData(picnum)
+        p['format'] = blorbfile.getPictFormat(picnum)
+        pictures[picnum] = p
+    if len(pictures) == 0:
+        return None
 
-    imagesLabel = Label(text=str(len(picindex)))
-    layout.add_widget(imagesLabel)
+    titles = ['Number', 'Format', 'Size', 'Standard Ratio', 'Minimum Ratio', 'Maximum Ratio']
+    layout = GridLayout(cols=len(titles), size_hint_y=None)
+    layout.bind(minimum_height=layout.setter('height'))
+    picnums = list(pictures.keys())
+    picnums.sort()
 
-    soundsLabel = Label(text=str(len(sndindex)))
-    layout.add_widget(soundsLabel)
-    
+    for t in titles:
+        l = Label(text=t, size_hint_y=None)
+        layout.add_widget(l)
+
+
+    for p in picnums:
+        numberLabel = Label(text=str(p), size_hint_y=None)
+
+        formatLabel = Label(text=pictures[p]['format'].decode('latin-1'), size_hint_y=None)
+        
+        sizeLabel = Label(text=str(pictures[p]['size']), size_hint_y=None)
+        
+        stdrat = str(pictures[p]['scale']['ratnum']) + '/' + str(pictures[p]['scale']['ratden'])
+        stdratLabel = Label(text=stdrat, size_hint_y=None)
+
+        minrat = str(pictures[p]['scale']['minnum']) + '/' + str(pictures[p]['scale']['minden'])
+        minratLabel = Label(text=minrat, size_hint_y=None)
+
+        maxrat = str(pictures[p]['scale']['maxnum']) + '/' + str(pictures[p]['scale']['maxden'])
+        maxratLabel = Label(text=maxrat, size_hint_y=None)
+        
+        layout.add_widget(numberLabel)
+        layout.add_widget(formatLabel)
+        layout.add_widget(sizeLabel)
+        layout.add_widget(stdratLabel)
+        layout.add_widget(minratLabel)
+        layout.add_widget(maxratLabel)
+        
+
+
     return layout
 
+def soundsContent():
+    sounds = {}
+    for sndnum in sndindex:
+        s = {}
+        s['data'] = blorbfile.getSnd(sndnum)
+        s['format'] = blorbfile.getSndFormat(sndnum)
+        s['type'] = blorbfile.getSndType(sndnum)
+        sounds[sndnum] = s
+    
+    if len(sounds) == 0:
+        return None
+    titles = ['Sound Number', 'Format', 'Type']
+    layout = GridLayout(cols=len(titles), size_hint_y=None)
+    layout.bind(minimum_height=layout.setter('height'))
+    sndnums = list(sounds.keys())
+    sndnums.sort()
 
+    for t in titles:
+        l = Label(text=t, size_hint_y=None)
+        layout.add_widget(l)
+
+
+    for s in sndnums:
+        numberLabel = Label(text=str(s), size_hint_y=None)
+
+        formatLabel = Label(text=sounds[s]['format'].decode('latin-1'), size_hint_y=None)
+
+        if sounds[s]['type'] == 0:
+            sndtype = 'Sample'
+        else:
+            sndtype = 'Music'
+        typeLabel = Label(text=sndtype, size_hint_y=None)
+        
+        layout.add_widget(numberLabel)
+        layout.add_widget(formatLabel)
+        layout.add_widget(typeLabel)
+
+    return layout
+
+def showpicture():
+    #im = CoreImage(data, ext="png")
+    pass
 
 
 class MainApp(App):
@@ -262,12 +317,16 @@ class MainApp(App):
         c = picturesContent()
         if c:
             tp.add_widget(imageTab)
-            imageTab.content = c
+            scroll = ScrollView(size_hint=(1, None), size=(tp.width, Window.height - tp.height), bar_width=10, scroll_type=['bars', 'content'])
+            scroll.add_widget(c)
+            imageTab.content = scroll
 
         c = soundsContent()
         if c:
             tp.add_widget(soundTab)
-            soundTab.content = c
+            scroll = ScrollView(size_hint=(1, None), size=(tp.width, Window.height - tp.height), bar_width=10, scroll_type=['bars', 'content'])
+            scroll.add_widget(c)
+            soundTab.content = scroll
 
 
         #layout.bind(size=self._update_rect, pos=self._update_rect)
