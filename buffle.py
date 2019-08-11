@@ -112,32 +112,22 @@ exec_format = {'ZCOD':'Z-code',
                'EXEC': 'Native executable' 
               }
 
-#      self.label = Label(text="I'm aligned :)", size_hint=(1.0, 1.0), halign="left", valign="middle")
-#        self.label.bind(size=self.label.setter('text_size'))    
-#        self.root.add_widget(self.label)
-#        return self.root
+
 def overviewContent():
     layout = GridLayout(cols=1)
     filenameLabel = Label(text=filename, font_size=20)
-#    filenameLabel.bind(size=filenameLabel.setter('text_size'))
     layout.add_widget(filenameLabel)
     
     t = 'Games: ' + str(len(execindex))
     gameLabel = Label(text=t, font_size=20)
-#    gameLabel.bind(size=gameLabel.setter('text_size'))
     layout.add_widget(gameLabel)
-
 
     t = 'Images: ' + str(len(picindex))
     imagesLabel = Label(text=t, font_size=20)
-#    imagesLabel.bind(size=imagesLabel.setter('text_size'))
     layout.add_widget(imagesLabel)
-
-
 
     t = 'Sounds: ' + str(len(sndindex))
     soundsLabel = Label(text=t, font_size=20)
-#    soundsLabel.bind(size=soundsLabel.setter('text_size'))
     layout.add_widget(soundsLabel)
     
     return layout
