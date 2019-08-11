@@ -141,7 +141,10 @@ def gameContent():
         e['format'] = blorbfile.getExecFormat(execnum)
         executables[execnum] = e
     if len(executables) > 0:
-        gameFormat = exec_format[executables[0]['format'].decode('utf-8')]
+        try:
+            gameFormat = exec_format[executables[0]['format'].decode('latin-1')]
+        except:
+            gameFormat = "Unknown game format (" + executables[0]['format'].decode('latin-1') + ")"
     else:
         gameFormat = None
         
@@ -197,10 +200,23 @@ def picturesContent():
         p['scale'] =  blorbfile.getScaleData(picnum)
         p['format'] = blorbfile.getPictFormat(picnum)
         pictures[picnum] = p
+        
     if len(pictures) == 0:
         return None
 
-    titles = ['Number', 'Format', 'Size', 'Standard Ratio', 'Minimum Ratio', 'Maximum Ratio']
+    if blorbfile.getExecFormat(0) == b'ZCOD':
+        zcode = True
+    else:
+        zcode = False
+    
+    if blorbfile.findChunk(b'Reso') == 0:
+        reso = False
+    else:
+        reso = True
+
+    titles = ['Number', 'Format', 'Size']
+    if zcode or reso:
+        titles.extend(['Standard Ratio', 'Minimum Ratio', 'Maximum Ratio'])
     layout = GridLayout(cols=len(titles), size_hint_y=None)
     layout.bind(minimum_height=layout.setter('height'))
     picnums = list(pictures.keys())
@@ -217,22 +233,24 @@ def picturesContent():
         formatLabel = Label(text=pictures[p]['format'].decode('latin-1'), size_hint_y=None)
         
         sizeLabel = Label(text=str(pictures[p]['size']), size_hint_y=None)
-        
-        stdrat = str(pictures[p]['scale']['ratnum']) + '/' + str(pictures[p]['scale']['ratden'])
-        stdratLabel = Label(text=stdrat, size_hint_y=None)
 
-        minrat = str(pictures[p]['scale']['minnum']) + '/' + str(pictures[p]['scale']['minden'])
-        minratLabel = Label(text=minrat, size_hint_y=None)
-
-        maxrat = str(pictures[p]['scale']['maxnum']) + '/' + str(pictures[p]['scale']['maxden'])
-        maxratLabel = Label(text=maxrat, size_hint_y=None)
-        
         layout.add_widget(numberLabel)
         layout.add_widget(formatLabel)
-        layout.add_widget(sizeLabel)
-        layout.add_widget(stdratLabel)
-        layout.add_widget(minratLabel)
-        layout.add_widget(maxratLabel)
+        layout.add_widget(sizeLabel)        
+
+        if zcode or reso:
+            stdrat = str(pictures[p]['scale']['ratnum']) + '/' + str(pictures[p]['scale']['ratden'])
+            stdratLabel = Label(text=stdrat, size_hint_y=None)
+
+            minrat = str(pictures[p]['scale']['minnum']) + '/' + str(pictures[p]['scale']['minden'])
+            minratLabel = Label(text=minrat, size_hint_y=None)
+
+            maxrat = str(pictures[p]['scale']['maxnum']) + '/' + str(pictures[p]['scale']['maxden'])
+            maxratLabel = Label(text=maxrat, size_hint_y=None)
+        
+            layout.add_widget(stdratLabel)
+            layout.add_widget(minratLabel)
+            layout.add_widget(maxratLabel)
         
 
 
@@ -249,7 +267,15 @@ def soundsContent():
     
     if len(sounds) == 0:
         return None
-    titles = ['Sound Number', 'Format', 'Type']
+
+    if blorbfile.getExecFormat(0) == b'ZCOD':
+        zcode = True
+    else:
+        zcode = False
+    
+    titles = ['Sound Number', 'Format']
+    if zcode:
+        title.extend(['Type'])
     layout = GridLayout(cols=len(titles), size_hint_y=None)
     layout.bind(minimum_height=layout.setter('height'))
     sndnums = list(sounds.keys())
@@ -264,16 +290,18 @@ def soundsContent():
         numberLabel = Label(text=str(s), size_hint_y=None)
 
         formatLabel = Label(text=sounds[s]['format'].decode('latin-1'), size_hint_y=None)
-
-        if sounds[s]['type'] == 0:
-            sndtype = 'Sample'
-        else:
-            sndtype = 'Music'
-        typeLabel = Label(text=sndtype, size_hint_y=None)
         
         layout.add_widget(numberLabel)
         layout.add_widget(formatLabel)
-        layout.add_widget(typeLabel)
+
+        if zcode:
+            if sounds[s]['type'] == 0:
+                sndtype = 'Sample'
+            else:
+                sndtype = 'Music'
+            typeLabel = Label(text=sndtype, size_hint_y=None)
+        
+            layout.add_widget(typeLabel)
 
     return layout
 
