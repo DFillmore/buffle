@@ -15,6 +15,7 @@
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.graphics import Color, Rectangle
+from kivy.graphics.texture import Texture
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.treeview import TreeView, TreeViewLabel
@@ -22,40 +23,16 @@ from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader
 from kivy.uix.label import Label
+from kivy.core.image import Image as CoreImage
+from kivy.uix.image import Image as Image
+from kivy.uix.widget import Widget
 
 
 import blorb
 import babel
 import os
 import sys
-
-#filename = 'blorbs/arthur.blb'
-#filename = 'blorbs/journey.blb'
-#filename = 'blorbs/shogun.blb'
-#filename = 'blorbs/zorkzero.blb'
-#filename = 'blorbs/moments.blb'
-#filename = 'blorbs/CounterfeitMonkey.gblorb'
-
-
-
-
-#try:
-#    screen = dict(zip(('px', 'py', 'minx', 'miny', 'maxx', 'maxy'), blorbfile.getWinSizes()))
-#except:
-#    screen = None
-
-
-
-    
-    
-
-    
-
-
-
-
-
-
+import io
 
 def addScreenInfo(tree_view, screen):
     if not screen:
@@ -99,17 +76,17 @@ def addScreenInfo(tree_view, screen):
         
 
 exec_format = {'ZCOD':'Z-code',
-               'GLUL': 'Glulx',
-               'TAD2': 'TADS 2',
-               'TAD3': 'TADS 3', 
-               'HUGO': 'Hugo', 
-               'ALAN': 'Alan', 
-               'ADRI': 'ADRIFT', 
-               'LEVE': 'Level 9', 
-               'AGT ': 'AGT', 
-               'MAGS': 'Magnetic Scrolls', 
-               'ADVS': 'AdvSys', 
-               'EXEC': 'Native executable' 
+               'GLUL':'Glulx',
+               'TAD2':'TADS 2',
+               'TAD3':'TADS 3', 
+               'HUGO':'Hugo', 
+               'ALAN':'Alan', 
+               'ADRI':'ADRIFT', 
+               'LEVE':'Level 9', 
+               'AGT ':'AGT', 
+               'MAGS':'Magnetic Scrolls', 
+               'ADVS':'AdvSys', 
+               'EXEC':'Native executable' 
               }
 
 
@@ -217,14 +194,15 @@ def picturesContent():
     titles = ['Number', 'Format', 'Size']
     if zcode or reso:
         titles.extend(['Standard Ratio', 'Minimum Ratio', 'Maximum Ratio'])
-    layout = GridLayout(cols=len(titles), size_hint_y=None)
-    layout.bind(minimum_height=layout.setter('height'))
+    titles.extend(['Preview'])
+    details = GridLayout(cols=len(titles), size_hint_y=None)
+    details.bind(minimum_height=details.setter('height'))
     picnums = list(pictures.keys())
     picnums.sort()
 
     for t in titles:
         l = Label(text=t, size_hint_y=None)
-        layout.add_widget(l)
+        details.add_widget(l)
 
 
     for p in picnums:
@@ -234,9 +212,9 @@ def picturesContent():
         
         sizeLabel = Label(text=str(pictures[p]['size']), size_hint_y=None)
 
-        layout.add_widget(numberLabel)
-        layout.add_widget(formatLabel)
-        layout.add_widget(sizeLabel)        
+        details.add_widget(numberLabel)
+        details.add_widget(formatLabel)
+        details.add_widget(sizeLabel)        
 
         if zcode or reso:
             stdrat = str(pictures[p]['scale']['ratnum']) + '/' + str(pictures[p]['scale']['ratden'])
@@ -248,13 +226,25 @@ def picturesContent():
             maxrat = str(pictures[p]['scale']['maxnum']) + '/' + str(pictures[p]['scale']['maxden'])
             maxratLabel = Label(text=maxrat, size_hint_y=None)
         
-            layout.add_widget(stdratLabel)
-            layout.add_widget(minratLabel)
-            layout.add_widget(maxratLabel)
+            details.add_widget(stdratLabel)
+            details.add_widget(minratLabel)
+            details.add_widget(maxratLabel)
+
+        previewImage = getImage(p)
+        details.add_widget(previewImage)
         
+    return details
 
-
-    return layout
+def getImage(imageNum):
+    data = io.BytesIO(blorbfile.getPict(imageNum))
+    ex = blorbfile.getPictFormat(imageNum).decode('latin-1').strip().lower()
+    if ex != 'rect':
+        cimage=CoreImage(data, ext=ex).texture
+        image = Image(texture=cimage)
+    else:
+        r = blorb.rect(data.read())
+        image = Image(texture=Rectangle(size=(r.getWidth(), r.getHeight())).texture)
+    return image
 
 def soundsContent():
     sounds = {}
@@ -304,11 +294,6 @@ def soundsContent():
             layout.add_widget(typeLabel)
 
     return layout
-
-def showpicture():
-    #im = CoreImage(data, ext="png")
-    pass
-
 
 class MainApp(App):
 
