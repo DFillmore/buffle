@@ -205,10 +205,15 @@ class Blorb:
         # Ogg Sounds = music
         # mod sounds = music
         # Song Sounds = music (unsupported)
+       
+
         format = self.getSndFormat(sndnum)
         if format == b'AIFF':
-            return 0 # effect
-        return 1 # music
+            return 0 # sample
+        if format in ['OGGV', 'MOD ', 'SONG']:
+            return 1 # music
+        return 2 # unknown format, so unknown type
+
 
     def getWinSizes(self):
         x = self.findChunk(b'Reso')
