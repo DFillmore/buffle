@@ -24,8 +24,7 @@ from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader
 from kivy.uix.label import Label
 
 
-import blorb
-import babel
+import ififf
 import os
 import sys
 
@@ -148,15 +147,17 @@ def gameContent():
     else:
         gameFormat = None
         
-
-    iFiction = blorbfile.getMetaData()
-    if iFiction:
+    c = blorbfile.find_chunk('IFmd')
+     
+    if c:
+        iFiction = c.xml
         gameTitle = babel.getTitle(iFiction)
         gameHeadline = babel.getHeadline(iFiction)
         gameAuthor = babel.getAuthor(iFiction)
         gameDescription = babel.getDescription(iFiction)
         gameCoverPicture = babel.getCoverPicture(iFiction)
     else:
+        iFiction = None
         gameTitle = None
         gameHeadline = None
         gameAuthor = None
@@ -368,13 +369,37 @@ def parameters(argv):
     
 if __name__ == '__main__':
     filename = parameters(sys.argv)
-    blorbfile = blorb.Blorb(filename)
+    f = open(filename, 'rb')
+    fd = f.read()
+    f.close()
+    blorbfile = ififf.iff.chunk(fd)
+    blorbfile = ififf.iff.identify_chunk(blorbfile)
+    
+    if blorbfile.ID != 'FORM':
+        print('Not a blorb file.', file=sys.stderr)
+        exit()
+    else:
+        if blorbfile.subID != 'IFRS':
+            print('Not a blorb file.', file=sys.stderr)
+            exit()
 
-    #chunks = blorbfile.listChunks()
-
-    picindex = blorbfile.resindex[b'Pict']
-    sndindex = blorbfile.resindex[b'Snd ']
-    execindex = blorbfile.resindex[b'Exec']
+    resindex = blorbfile.sub_chunks[0]
+    if resindex.ID != 'RIdx':
+        print('Resource index missing or misplaced.')
+        exit()
+    print(resindex.resources)
+    try:
+        picindex = resindex.resources['Pict']
+    except:
+        picindex = []
+    try:
+        sndindex = resindex.resources['Snd ']
+    except:
+        sndindex = []
+    try:
+        execindex = resindex.resources['Exec']
+    except:
+        execindex = []
     
     MainApp().run()
 
